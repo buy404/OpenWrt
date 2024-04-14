@@ -22,7 +22,8 @@ function git_sparse_clone() {
   branch="$1" repourl="$2" && shift 2
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
-  cd $repodir && git sparse-checkout set $@
+  cd $repodir && git sparse-checkout init --cone
+  git sparse-checkout set $@
   mv -f $@ ../package
   cd .. && rm -rf $repodir
 }
@@ -91,10 +92,10 @@ orig_version=$(cat "package/lean/default-settings/files/zzz-default-settings" | 
 sed -i "s/${orig_version}/R${date_version} by Haiibo/g" package/lean/default-settings/files/zzz-default-settings
 
 # 修复 hostapd 报错
-cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
+# cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
 
 # 修复 armv8 设备 xfsprogs 报错
-sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
+# sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
 # 修改 Makefile
 find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {}
